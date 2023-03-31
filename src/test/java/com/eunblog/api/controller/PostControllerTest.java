@@ -2,6 +2,8 @@ package com.eunblog.api.controller;
 
 import com.eunblog.api.domain.Post;
 import com.eunblog.api.repository.PostRepository;
+import com.eunblog.api.request.PostCreate;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.http.MediaType.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -20,6 +23,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @SpringBootTest
 class PostControllerTest {
+    @Autowired
+    private ObjectMapper objectMapper; //필수 학습
 
     @Autowired
     private MockMvc mockMvc;
@@ -35,6 +40,16 @@ class PostControllerTest {
     @Test
     @DisplayName("/posts 요청시 hello world를 출력한다.")
     public void test() throws Exception {
+        //given
+        PostCreate request = PostCreate.builder()
+                .title("제목입니다.")
+                .content("내용입니다.")
+                .build();
+
+        String param = objectMapper.writeValueAsString(request);
+
+        System.out.println("param = " + param);
+
         // 글 제목
         // 글 내용
         // 사용자 id, user,level
@@ -51,22 +66,33 @@ class PostControllerTest {
         //expected
         mockMvc.perform(post("/posts")   // Content-Type -> application/json
                                 .content("{\"title\":\"제목입니다.\",\"content\":\"내용입니다.\"}")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
+                                .content(param)
                         //.param("title", "글제목입니다.")
                         //.param("content", "글내용입니다. 하하")
                 )
                 .andExpect(status().isOk())
-                .andExpect(content().string("{}"))
+                //.andExpect(content().string("{}"))
+                .andExpect(content().string(""))
                 .andDo(print());
 
     }
     @Test
     @DisplayName("/posts 요청시 title값은 필수이다.")
     public void test2() throws Exception {
+        //given
+        PostCreate request = PostCreate.builder()
+                .content("내용입니다")
+                .title("")
+                .build();
+
+        String param = objectMapper.writeValueAsString(request);
+
         //expected
         mockMvc.perform(post("/posts")   // Content-Type -> application/json
-                                .content("{\"title\":\"\",\"content\":\"내용입니다.\"}")
-                        .contentType(MediaType.APPLICATION_JSON)
+                                //.content("{\"title\":\"\",\"content\":\"내용입니다.\"}")
+                                .content(param)
+                        .contentType(APPLICATION_JSON)
                 )
                 .andExpect(status().isBadRequest())
                 //.andExpect(status().isOk())
@@ -79,10 +105,19 @@ class PostControllerTest {
     @Test
     @DisplayName("/posts 요청시 DB 에 값이 저장된다.")
     public void test3() throws Exception {
+        //given
+        PostCreate request = PostCreate.builder()
+                .content("내용입니다.")
+                .title("제목입니다.")
+                .build();
+
+        String param = objectMapper.writeValueAsString(request);
+
         //expected
         mockMvc.perform(post("/posts")   // Content-Type -> application/json
-                                .content("{\"title\":\"제목입니다.\",\"content\":\"내용입니다.\"}")
-                        .contentType(MediaType.APPLICATION_JSON)
+                                //.content("{\"title\":\"제목입니다.\",\"content\":\"내용입니다.\"}")
+                                .content(param)
+                        .contentType(APPLICATION_JSON)
                 )
                 //.andExpect(status().isBadRequest())
                 .andExpect(status().isOk())

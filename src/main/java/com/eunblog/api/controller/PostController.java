@@ -1,5 +1,6 @@
 package com.eunblog.api.controller;
 
+import com.eunblog.api.domain.Post;
 import com.eunblog.api.request.PostCreate;
 import com.eunblog.api.service.PostService;
 import lombok.RequiredArgsConstructor;
@@ -29,10 +30,18 @@ public class PostController {
     //GET,POST,PUT,PATCH,DELETE,OPTIONS, HEAD, TRACE,CONNECT
     //글 등록(POST)
     @PostMapping("/posts")
-    public Map<String,String> post(@RequestBody @Valid PostCreate request) throws Exception {
+    public void post(@RequestBody @Valid PostCreate request) throws Exception {
         log.info("params = {}",request);
+        // Case1. 저장한 데이터 Entity -> response 로 응답하기
+        // Case2. 저장한 데이터의 primary_id -> response 로 응답하기
+        //      Client 에서는 수신한 id를 post조회한 api를 통해서 데이터를 수신받음
+        // Case3. 응답 필요 없음 -> 클라이언트에서 모든 POST(글) 데이터 context를 잘 관리함.
+        // Bad Case : 서버에서 -> 반드시 이렇게 할껍니다! 노노
+                //-> 서버에서는 유연하게 대응.
+                // -> 한번에 일괄적으로 잘 처리되는 케이스가 없다. -> 잘 관리하는 형태가 중요합니다.
+
         postService.write(request);
-        return Map.of();
+        //return Map.of();
     }
 
     @PostMapping("/posts_old")

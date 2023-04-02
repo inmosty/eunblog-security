@@ -1,8 +1,10 @@
 package com.eunblog.api.service;
 
 import com.eunblog.api.domain.Post;
+import com.eunblog.api.exception.PostNotFound;
 import com.eunblog.api.repository.PostRepository;
 import com.eunblog.api.request.PostCreate;
+import com.eunblog.api.request.PostEdit;
 import com.eunblog.api.request.PostSearch;
 import com.eunblog.api.response.PostResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,8 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 public class PostServiceTest {
@@ -102,9 +103,100 @@ public class PostServiceTest {
         //assertEquals("호돌맨 제목 - 30",posts.get(0).getTitle());
         //assertEquals("호돌맨 제목 - 26",posts.get(4).getTitle());
     }
+
+    @Test
+    @DisplayName("글 제목 수정")
+    void test4() {
+        //given
+        Post post = Post.builder()
+                .title("박종국")
+                .content("주말농장")
+                .build();
+
+        postRepository.save(post);
+
+        PostEdit postEdit = PostEdit.builder()
+                .title("박종국1")
+                .content("주말농장1")
+                .build();
+
+        // when
+        postService.edit(post.getId(),postEdit);
+
+        //then
+        Post changedPost = postRepository.findById(post.getId())
+                .orElseThrow(()->new RuntimeException("글이 존재하지 않습니다. id = "+post.getId()));
+
+        assertEquals("박종국1",changedPost.getTitle());
+        assertEquals("주말농장1",changedPost.getContent());
+    }
+
+    @Test
+    @DisplayName("글 내용 수정")
+    void test5() {
+        //given
+        Post post = Post.builder()
+                .title("박종국")
+                .content("주말농장")
+                .build();
+
+        postRepository.save(post);
+
+        PostEdit postEdit = PostEdit.builder()
+                //.title(null)
+                .content("주말농장1")
+                .build();
+
+        // when
+        postService.edit(post.getId(),postEdit);
+
+        //then
+        Post changedPost = postRepository.findById(post.getId())
+                .orElseThrow(()->new RuntimeException("글이 존재하지 않습니다. id = "+post.getId()));
+
+        assertEquals("박종국",changedPost.getTitle());
+        assertEquals("주말농장1",changedPost.getContent());
+    }
+
+    @Test
+    @DisplayName("게시글 삭제")
+    public void test6() {
+        //given
+        Post post = Post.builder()
+                .title("박종국")
+                .content("주말농장")
+                .build();
+
+        postRepository.save(post);
+
+        //when
+        postService.delete(post.getId());
+
+        //then
+        assertEquals(0,postRepository.count());
+    }
+
+    @Test
+    @DisplayName("글 1개 조회(예외처리)- 존재히지 않는 글")
+    void test7() {
+        //given
+        Post post = Post.builder()
+                .title("foo")
+                .content("bar")
+                .build();
+        postRepository.save(post);
+
+        //expected
+        PostNotFound e = assertThrows(PostNotFound.class, () -> {
+            postService.get(post.getId() + 1L);
+        });
+        assertEquals("존재하지 않는 글입니다.",e.getMessage());
+    }
+
     @Test
     @DisplayName("글 여러개 조회")
     void test3_old() {
+
         //given
         postRepository.saveAll(List.of(
                 Post.builder()
@@ -116,7 +208,6 @@ public class PostServiceTest {
                         .content("bar2")
                         .build()
         ));
-
         //Pageable pageable = PageRequest.of(0, 5, DESC,"id");
         PostSearch postSearch = PostSearch.builder()
                 .page(1)
@@ -126,7 +217,49 @@ public class PostServiceTest {
         List<PostResponse> posts = postService.getList(postSearch);
 
         //then
-        assertEquals(2L,posts.size());
+        assertEquals(2L, posts.size());
+    }
+
+    @Test
+    @DisplayName("게시글 삭제- 존재히지 않는 글")
+    public void test8() {
+        //given
+        Post post = Post.builder()
+                .title("박종국")
+                .content("주말농장")
+                .build();
+
+        postRepository.save(post);
+
+        //expected
+        PostNotFound e = assertThrows(PostNotFound.class, () -> {
+            postService.delete(post.getId()+1L);
+        });
+
+        assertEquals("존재하지 않는 글입니다.",e.getMessage());
+    }
+
+    @Test
+    @DisplayName("글 내용 수정- 존재히지 않는 글")
+    void test9() {
+        //given
+        Post post = Post.builder()
+                .title("박종국")
+                .content("주말농장")
+                .build();
+
+        postRepository.save(post);
+
+        PostEdit postEdit = PostEdit.builder()
+                //.title(null)
+                .content("주말농장1")
+                .build();
+
+        //expected
+        PostNotFound e = assertThrows(PostNotFound.class, () -> {
+            postService.edit(post.getId()+1,postEdit);
+        });
+        assertEquals("존재하지 않는 글입니다.",e.getMessage());
     }
 
 }

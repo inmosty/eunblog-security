@@ -1,18 +1,17 @@
 package com.eunblog.api.controller;
 
 
+import com.eunblog.api.exception.EunblogException;
 import com.eunblog.api.response.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @ControllerAdvice
@@ -33,6 +32,30 @@ public class ExceptionController {
             response.addValidation(fieldError.getField(), fieldError.getDefaultMessage());
         }
 
+        return response;
+    }
+
+    @ResponseBody
+    //@ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(EunblogException.class)
+    public ResponseEntity<ErrorResponse> eunblogException(EunblogException e) {
+        int statusCode = e.getStatusCode();
+        ErrorResponse body = ErrorResponse.builder()//new ErrorResponse("400", "잘못된 요청입니다.");
+                .code(String.valueOf(statusCode))
+                .message(e.getMessage())
+                .validation(e.getValidation())
+                .build();
+
+        //응답 json validation
+/*        if (e instanceof InvalidRequest) {
+            InvalidRequest invalidRequest = (InvalidRequest) e;
+            String fieldName = invalidRequest.getFieldName();
+            String message = invalidRequest.getMessage();
+            body.addValidation(fieldName,message);
+        }*/
+
+        ResponseEntity<ErrorResponse> response =  ResponseEntity.status(statusCode)
+                .body(body);
         return response;
     }
 

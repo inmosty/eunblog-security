@@ -1,6 +1,7 @@
 package com.eunblog.api.controller;
 
 import com.eunblog.api.request.PostCreate;
+import com.eunblog.api.request.PostEdit;
 import com.eunblog.api.request.PostSearch;
 import com.eunblog.api.response.PostResponse;
 import com.eunblog.api.service.PostService;
@@ -32,6 +33,7 @@ public class PostController {
     //글 등록(POST)
     @PostMapping("/posts")
     public void post(@RequestBody @Valid PostCreate request) throws Exception {
+        request.validate();
         log.info("params = {}",request);
         // Case1. 저장한 데이터 Entity -> response 로 응답하기
         // Case2. 저장한 데이터의 primary_id -> response 로 응답하기
@@ -68,6 +70,16 @@ public class PostController {
     public List<PostResponse> getList(@ModelAttribute PostSearch postSearch){//@PageableDefault 제거
         log.info("pageable = {}",postSearch);
         return postService.getList(postSearch);
+    }
+
+    @PatchMapping("/posts/{postId}")
+    public void edit(@PathVariable Long postId, @RequestBody @Valid PostEdit request) {
+        postService.edit(postId,request);
+    }
+
+    @DeleteMapping("/posts/{postId}")
+    public void delete(@PathVariable Long postId) {
+        postService.delete(postId);
     }
 
 /*    @GetMapping("/posts/{postId}/rss")

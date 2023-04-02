@@ -1,7 +1,8 @@
 package com.eunblog.api.controller;
 
-import com.eunblog.api.domain.Post;
 import com.eunblog.api.request.PostCreate;
+import com.eunblog.api.request.PostSearch;
+import com.eunblog.api.response.PostResponse;
 import com.eunblog.api.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,8 +45,39 @@ public class PostController {
         //return Map.of();
     }
 
+    /**
+     * /posts -> 글 전체 조회( 검색 + 페이징)
+     * /posts/{postId} -> 글 한개만 조회
+     */
+
+    @GetMapping("/posts/{postId}")
+    public PostResponse get(@PathVariable Long postId) {
+        // 응답 클래스를 분리하세요(서비스 정책에 맞는)
+        return postService.get(postId);
+    }
+
+    // 조회 API
+    // 단건 조회 API (1개의 글 Post을 가져오는 기능)
+    // 여러개의 글을 조회 API /posts
+
+    //글이 너무 많은경우 -> 비용이 너무 많이 든다.
+    //글이 ->1000000000-> DB글 모두 조회하는 경우 -> DB 과부하
+    // DB-> 애플리케이션 서버로 전달하는 시간, 트래픽비용 등이 많이 발생할 수 있다.
+
+    @GetMapping("/posts")
+    public List<PostResponse> getList(@ModelAttribute PostSearch postSearch){//@PageableDefault 제거
+        log.info("pageable = {}",postSearch);
+        return postService.getList(postSearch);
+    }
+
+/*    @GetMapping("/posts/{postId}/rss")
+    public Post getRss(@PathVariable(name = "postId") Long id) {
+        return postService.getRss(id);
+    }*/
+
     @PostMapping("/posts_old")
-    public Map<String,String> post_old(@RequestBody @Valid PostCreate params, BindingResult result) throws Exception {    // (@ModelAttribute PostCreate params){ (@RequestParam Map<String,String> params){ (@RequestParam String title,@RequestParam String content){
+    public Map<String, String> post_old(@RequestBody @Valid PostCreate params, BindingResult result) throws Exception {    // (@ModelAttribute PostCreate params){ (@RequestParam Map<String,String> params){ (@RequestParam String title,@RequestParam String content){
+
         //1. 매번 메서드마다 값을 검증 해야 한다
         //  > 개발자가 까먹을 수 있다.
         //  > 검증 부분에서 버그가 발생할 여지가 높다.
@@ -54,7 +86,7 @@ public class PostController {
         // 3. 여러개의 에러처리 힘들다
         // 4. 세번이상의 반복적인 작업은 피해야한다.
         // 5. 코드 && 개발에 관한 모든것
-        log.info("params = {}",params);
+        log.info("params = {}", params);
         if (result.hasErrors()) {
             List<FieldError> fieldErrors = result.getFieldErrors();
             FieldError firstFieldError = fieldErrors.get(0);
@@ -80,7 +112,7 @@ public class PostController {
             //5. 뭔가 개발자 스럽지 않다.
             throw new Exception("타이틀값이 없어요.");
         }*/
-        String content =params.getContent();
+        String content = params.getContent();
 /*        if (content == null || content.equals("")) {
             throw new Exception("컨텐츠 값이 없어요");
         }*/

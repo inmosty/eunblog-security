@@ -15,6 +15,9 @@ public class PostEdit {
     //@NotBlank(message = "콘텐츠를 입력하세요.")
     private String content;
 
+    public PostEdit() {
+    }
+
     @Builder
     public PostEdit(String title, String content) {
         this.title = title;

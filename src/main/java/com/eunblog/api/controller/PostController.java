@@ -1,5 +1,6 @@
 package com.eunblog.api.controller;
 
+import com.eunblog.api.config.data.UserSession;
 import com.eunblog.api.request.PostCreate;
 import com.eunblog.api.request.PostEdit;
 import com.eunblog.api.request.PostSearch;
@@ -28,13 +29,22 @@ public class PostController {
 
     private final PostService postService;
 
+    @GetMapping("test")
+    public String test() {
+        return "hello";
+    }
+
+    @GetMapping("foo")
+    public String foo(UserSession userSession) {
+        log.info("userSession.name = {}", userSession.name);
+        return "foo";
+    }
+
     //Http Method
     //GET,POST,PUT,PATCH,DELETE,OPTIONS, HEAD, TRACE,CONNECT
     //글 등록(POST)
     @PostMapping("/posts")
     public void post(@RequestBody @Valid PostCreate request) throws Exception {
-        request.validate();
-        log.info("params = {}",request);
         // Case1. 저장한 데이터 Entity -> response 로 응답하기
         // Case2. 저장한 데이터의 primary_id -> response 로 응답하기
         //      Client 에서는 수신한 id를 post조회한 api를 통해서 데이터를 수신받음
@@ -43,6 +53,8 @@ public class PostController {
                 //-> 서버에서는 유연하게 대응.
                 // -> 한번에 일괄적으로 잘 처리되는 케이스가 없다. -> 잘 관리하는 형태가 중요합니다.
 
+        request.validate();
+        log.info("params = {}",request);
         postService.write(request);
         //return Map.of();
     }

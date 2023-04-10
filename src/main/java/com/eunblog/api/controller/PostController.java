@@ -36,8 +36,8 @@ public class PostController {
 
     @GetMapping("foo")
     public String foo(UserSession userSession) {
-        log.info("userSession.name = {}", userSession.name);
-        return "foo";
+        log.info("userSession.id = {}", userSession.id);
+        return String.valueOf(userSession.id);
     }
 
     //Http Method

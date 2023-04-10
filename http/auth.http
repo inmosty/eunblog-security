@@ -1,0 +1,9 @@
+### 로그인
+
+POST http://localhost:8080/auth/login
+content-Type: application/json
+
+{
+  "email" : "inmosty@gmail.com",
+  "password": "1234"
+}

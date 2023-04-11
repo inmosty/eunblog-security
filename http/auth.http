@@ -7,3 +7,9 @@ content-Type: application/json
   "email" : "inmosty@gmail.com",
   "password": "1234"
 }
+
+### 인증 페이지 요청
+
+GET http://localhost:8080/foo
+Content-Type: application/json
+Cookie: SESSION=4466a405-eaf6-41c4-887e-da7518f88dda

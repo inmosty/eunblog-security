@@ -20,3 +20,10 @@ spring:
     defer-datasource-initialization: true
   sql:
     init-model: always
+
+hodolman:
+  hello:
+    name: "hodolman"
+    home: "seoul"
+    hobby: "programming"
+    age: 36

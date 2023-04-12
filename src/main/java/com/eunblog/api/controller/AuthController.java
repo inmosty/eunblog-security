@@ -4,17 +4,16 @@ import com.eunblog.api.repository.UserRepository;
 import com.eunblog.api.request.Login;
 import com.eunblog.api.response.SessionResponse;
 import com.eunblog.api.service.AuthService;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.Duration;
-
-import static org.springframework.http.HttpHeaders.SET_COOKIE;
+import javax.crypto.SecretKey;
+import java.util.Base64;
 
 @Slf4j
 @RestController
@@ -22,9 +21,34 @@ import static org.springframework.http.HttpHeaders.SET_COOKIE;
 public class AuthController {
     private final UserRepository userRepository;
     private final AuthService authService;
+    private static final String KEY = "bjMPtA04oRHGotaP/5rQmejCSDVPvZYg0KUiFppZxlA=";
 
     @PostMapping("/auth/login")
-    public ResponseEntity<Object> login(@RequestBody Login login) {
+    public SessionResponse login(@RequestBody Login login) {
+        //DB에서 조회
+        Long userId = authService.signin(login);
+
+        //  Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+/*
+        byte[] encodedKey = key.getEncoded();
+        String strKey = Base64.getEncoder().encodeToString(encodedKey);
+*/
+
+        //bjMPtA04oRHGotaP/5rQmejCSDVPvZYg0KUiFppZxlA=
+        //log.info("strKey = {}", strKey);
+
+        SecretKey secretKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(KEY));
+
+        String jws = Jwts.builder()
+                .setSubject(String.valueOf(userId))
+                .signWith(secretKey)
+                .compact();
+        log.info("jws = {}", jws);
+
+        return new SessionResponse(jws);
+    }
+    /*@PostMapping("/auth/login_cookie")
+    public ResponseEntity<Object> login_cookie(@RequestBody Login login) {
         //DB에서 조회
         String accessToken = authService.signin(login);
         ResponseCookie cookie = ResponseCookie.from("SESSION", accessToken)
@@ -50,5 +74,5 @@ public class AuthController {
 
         //토콘을 응답
         return new SessionResponse(accessToken);
-    }
+    }*/
 }

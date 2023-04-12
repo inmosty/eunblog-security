@@ -1,29 +1,58 @@
 package com.eunblog.api.config;
 
 import com.eunblog.api.config.data.UserSession;
-import com.eunblog.api.domain.Session;
 import com.eunblog.api.exception.Unauthorized;
 import com.eunblog.api.repository.SessionRepository;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-
 @Slf4j
 @RequiredArgsConstructor
 public class AuthResolver implements HandlerMethodArgumentResolver {
+    private static final String KEY = "bjMPtA04oRHGotaP/5rQmejCSDVPvZYg0KUiFppZxlA=";
     private final SessionRepository sessionRepository;
+    private final AppConfig appConfig;
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.getParameterType().equals(UserSession.class);
     }
 
+    @Override
+    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+        log.info(">>{}", appConfig.toString());
+
+        String jws = webRequest.getHeader("Authorization");
+        log.info("jws = {}", jws);
+        if (jws == null || jws.equals("")) {
+            throw new Unauthorized();
+        }
+
+        byte[] decodedKey = Base64.decodeBase64(KEY);
+
+        try {
+            Jws<Claims> claims = Jwts.parserBuilder()
+                    .setSigningKey(decodedKey)
+                    .build()
+                    .parseClaimsJws(jws);
+            log.info("claims = {}", claims);
+            String userId = claims.getBody().getSubject();
+            log.info("userId = {}", userId);
+            return new UserSession(Long.parseLong(userId));
+        } catch (JwtException e) {
+            throw new Unauthorized();
+        }
+    }
+/*
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
         HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
@@ -39,6 +68,7 @@ public class AuthResolver implements HandlerMethodArgumentResolver {
 
         return new UserSession(sessionOption.getUser().getId());
     }
+*/
 /* old
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {

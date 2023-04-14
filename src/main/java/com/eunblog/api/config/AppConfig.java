@@ -10,7 +10,7 @@ import java.util.Base64;
 @ConfigurationProperties("eunblog")
 public class AppConfig {
 /*    public Hello hello;
-
+test
     @Data
     public static class Hello{
         public String name;

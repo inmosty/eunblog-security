@@ -1,9 +1,9 @@
 package com.eunblog.api.request;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.validation.constraints.NotBlank;
 
 @Slf4j
 @Getter

@@ -64,6 +64,21 @@ netstat -lntp //포트확인
 3. BCrypt SCrypt, Argon2
     1. salt 값
 
+==========================
+security 시작
+1. AuthResolver 삭제
+2. WebMvcConfig 에 addArgumentResolvers 등록 삭제
 
+4. crypto 폴더 삭제
+5. User -> addSession 메소드 삭제, private List<Session> sessions = new ArrayList<>(); 삭제
+6. Session 클래스 삭제
+7. SessionRepository 삭제
+8. SessionResponse 삭제
+9. AuthService 로그인 삭제
 
+============스프링부터 3.x 업데이트
+https://hodolman.com/54
+
+================시큐리티
+localhost:8080/login
 

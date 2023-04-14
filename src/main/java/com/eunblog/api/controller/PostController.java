@@ -1,18 +1,17 @@
 package com.eunblog.api.controller;
 
-import com.eunblog.api.config.data.UserSession;
 import com.eunblog.api.request.PostCreate;
 import com.eunblog.api.request.PostEdit;
 import com.eunblog.api.request.PostSearch;
 import com.eunblog.api.response.PostResponse;
 import com.eunblog.api.service.PostService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,17 +27,6 @@ import java.util.Map;
 public class PostController {
 
     private final PostService postService;
-
-    @GetMapping("test")
-    public String test() {
-        return "hello";
-    }
-
-    @GetMapping("foo")
-    public String foo(UserSession userSession) {
-        log.info("userSession.id = {}", userSession.id);
-        return String.valueOf(userSession.id);
-    }
 
     //Http Method
     //GET,POST,PUT,PATCH,DELETE,OPTIONS, HEAD, TRACE,CONNECT

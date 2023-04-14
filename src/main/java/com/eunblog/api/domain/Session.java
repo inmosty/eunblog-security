@@ -1,12 +1,11 @@
 package com.eunblog.api.domain;
 
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import javax.persistence.*;
 
 import static java.util.UUID.randomUUID;
 

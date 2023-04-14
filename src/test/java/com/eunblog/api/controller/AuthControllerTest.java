@@ -6,6 +6,7 @@ import com.eunblog.api.repository.PostRepository;
 import com.eunblog.api.repository.SessionRepository;
 import com.eunblog.api.repository.UserRepository;
 import com.eunblog.api.request.Login;
+import com.eunblog.api.request.Signup;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
@@ -166,6 +167,24 @@ class AuthControllerTest {
                         .contentType(APPLICATION_JSON)
                 )
                 .andExpect(status().isUnauthorized())
+                .andDo(print());
+    }
+    @Test
+    @DisplayName("회원가입")
+    public void test6() throws Exception {
+        //given
+        Signup signup = Signup.builder()
+                .email("inmosty@gmail.com")
+                .password("1234")
+                .name("박종국")
+                .build();
+
+        //expected
+        mockMvc.perform(post("/auth/signup")   // Content-Type -> application/json
+                        .content(objectMapper.writeValueAsString(signup))
+                        .contentType(APPLICATION_JSON)
+                )
+                .andExpect(status().isOk())
                 .andDo(print());
     }
 }

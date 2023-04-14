@@ -1,7 +1,9 @@
 package com.eunblog.api.controller;
 
+import com.eunblog.api.config.AppConfig;
 import com.eunblog.api.repository.UserRepository;
 import com.eunblog.api.request.Login;
+import com.eunblog.api.request.Signup;
 import com.eunblog.api.response.SessionResponse;
 import com.eunblog.api.service.AuthService;
 import io.jsonwebtoken.Jwts;
@@ -13,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.crypto.SecretKey;
-import java.util.Base64;
+import java.util.Date;
 
 @Slf4j
 @RestController
@@ -21,7 +23,8 @@ import java.util.Base64;
 public class AuthController {
     private final UserRepository userRepository;
     private final AuthService authService;
-    private static final String KEY = "bjMPtA04oRHGotaP/5rQmejCSDVPvZYg0KUiFppZxlA=";
+    private final AppConfig appConfig;
+    //private static final String KEY = "bjMPtA04oRHGotaP/5rQmejCSDVPvZYg0KUiFppZxlA=";
 
     @PostMapping("/auth/login")
     public SessionResponse login(@RequestBody Login login) {
@@ -37,16 +40,24 @@ public class AuthController {
         //bjMPtA04oRHGotaP/5rQmejCSDVPvZYg0KUiFppZxlA=
         //log.info("strKey = {}", strKey);
 
-        SecretKey secretKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(KEY));
+        log.info("appConfig.jwtKey = {}", appConfig.getJwtKey());
+        SecretKey secretKey = Keys.hmacShaKeyFor(appConfig.getJwtKey());
 
         String jws = Jwts.builder()
                 .setSubject(String.valueOf(userId))
                 .signWith(secretKey)
+                .setIssuedAt(new Date())
                 .compact();
         log.info("jws = {}", jws);
 
         return new SessionResponse(jws);
     }
+
+    @PostMapping("/auth/signup")
+    public void signup(@RequestBody Signup signup) {
+        authService.signup(signup);
+    }
+
     /*@PostMapping("/auth/login_cookie")
     public ResponseEntity<Object> login_cookie(@RequestBody Login login) {
         //DB에서 조회

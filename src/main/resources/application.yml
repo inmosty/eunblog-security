@@ -18,8 +18,8 @@ spring:
 
   jpa:
     defer-datasource-initialization: true
-  sql:
-    init-model: always
+#  sql:
+#    init.mode: always
 
 hodolman:
   hello:
@@ -27,3 +27,6 @@ hodolman:
     home: "seoul"
     hobby: "programming"
     age: 36
+
+eunblog:
+  jwt-key: "bjMPtA04oRHGotaP/5rQmejCSDVPvZYg0KUiFppZxlA="
